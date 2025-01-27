@@ -1,21 +1,37 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
 import animation from "../assets/LoginAnimation.json";
+import axios from "axios";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
+  const navigate = useNavigate();
   const handleSubmit = (e) => {
     e.preventDefault();
 
     const payload = { username, password };
-    console.log(payload);
 
-    // Reset form fields
-    setUsername("");
-    setPassword("");
-  };
+    axios.post("http://localhost:8000/api/user/login", payload,{ withCredentials: true })
+    .then((response) => {
+        const data = response.data;
+        if (response.status === 200) { // Check for a 200 status code
+            alert("Login Successfully");
+            console.log(data);
+            navigate("/chat-window");
+            setUsername("");
+            setPassword("");
+        } else {
+            alert(data.message || "Login failed. Please check your username and password.");
+        }
+    })
+    .catch((err) => {
+        console.error("Login error:", err.message);
+        alert("An error occurred during login. Please try again later.");
+    });
+};
 
   return (
     <div className="h-screen w-screen flex justify-center items-center">
@@ -29,9 +45,9 @@ const LoginPage = () => {
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col items-center">
           <input
-            type="email"
-            name="email"
-            aria-label="Email"
+            type="text"
+            name="username"
+            aria-label="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Enter username"
